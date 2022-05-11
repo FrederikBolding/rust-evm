@@ -104,8 +104,8 @@ pub fn evaluate(vm: &mut EVM, opcode: Opcode) -> EvalResult {
         }
         Opcode::JUMPI => {
             let popped = vm.stack.pop_n(2);
-            let condition = to_u256(popped[0]);
-            let destination = to_u256(popped[1]);
+            let destination = to_u256(popped[0]);
+            let condition = to_u256(popped[1]);
             if !condition.is_zero() {
                 // todo: check valid jump
                 return EvalResult::Jump(destination.as_usize());
