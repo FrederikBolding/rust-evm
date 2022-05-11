@@ -22,8 +22,9 @@ impl Stack {
     }
 
     pub fn pop_n(&mut self, n: usize) -> Vec<H256> {
-        // Needs reverse?
-        return self._stack.split_off(self._stack.len() - n);
+        let mut split = self._stack.split_off(self._stack.len() - n);
+        split.reverse();
+        return split;
     }
 
     pub fn swap(&mut self, i: u8) {

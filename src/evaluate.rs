@@ -5,6 +5,7 @@ use primitive_types::{H256, U256};
 #[derive(Clone, Eq, PartialEq, Debug)]
 pub enum EvalResult {
     Continue(),
+    Jump(usize),
     Exit(),
     Error(),
 }
@@ -52,13 +53,13 @@ pub fn evaluate(vm: &mut EVM, opcode: Opcode) -> EvalResult {
             let popped = vm.stack.pop_n(2);
             vm.stack
                 .push(to_h256(to_u256(popped[0]) * to_u256(popped[1])));
-               return EvalResult::Continue();
+            return EvalResult::Continue();
         }
         Opcode::DIV => {
             let popped = vm.stack.pop_n(2);
             vm.stack
                 .push(to_h256(to_u256(popped[0]) / to_u256(popped[1])));
-                return EvalResult::Continue();
+            return EvalResult::Continue();
         }
         Opcode::EQ => {
             let popped = vm.stack.pop_n(2);
@@ -91,10 +92,8 @@ pub fn evaluate(vm: &mut EVM, opcode: Opcode) -> EvalResult {
             let popped = vm.stack.pop_n(2);
             let first = to_u256(popped[0]);
             let second = to_u256(popped[1]);
-            //vm.stack.push(first ** second);
-            // todo!!
-            todo!();
-            vm.stack.push(H256::zero());
+            let exp = to_h256(first.pow(second));
+            vm.stack.push(exp);
             return EvalResult::Continue();
         }
         Opcode::CALLDATALOAD => {
@@ -109,7 +108,7 @@ pub fn evaluate(vm: &mut EVM, opcode: Opcode) -> EvalResult {
             let destination = to_u256(popped[1]);
             if !condition.is_zero() {
                 // todo: check valid jump
-                vm.program_counter = destination.as_usize();
+                return EvalResult::Jump(destination.as_usize());
             }
             return EvalResult::Continue();
         }

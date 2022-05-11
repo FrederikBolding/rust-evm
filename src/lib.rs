@@ -26,12 +26,15 @@ impl EVM {
     pub fn run(&mut self) {
         while self.program_counter < self.code.len() {
             let result = self.step();
-            self.program_counter += 1;
-            if result == EvalResult::Error() {
-                panic!("Execution resulted in an error!");
-            }
-            if result == EvalResult::Exit() {
-                break;
+            match result {
+                EvalResult::Continue() => self.program_counter += 1,
+                EvalResult::Jump(p) => self.program_counter = p,
+                EvalResult::Error() => {
+                    panic!("Execution resulted in an error!")
+                }
+                EvalResult::Exit() => {
+                    break;
+                }
             }
         }
     }
