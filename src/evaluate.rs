@@ -96,11 +96,20 @@ pub fn evaluate(vm: &mut EVM, opcode: Opcode) -> EvalResult {
             vm.stack.push(exp);
             return EvalResult::Continue();
         }
+        Opcode::POP => {
+            vm.stack.pop();
+            return EvalResult::Continue();
+        }
         Opcode::CALLDATALOAD => {
             let pos = to_u256(vm.stack.pop()).as_usize();
             let load = &vm.data[pos..pos + 32];
             vm.stack.push(H256::from_slice(load));
             return EvalResult::Continue();
+        }
+        Opcode::JUMP => {
+            let destination = to_u256(vm.stack.pop());
+            // todo: check valid jump
+            return EvalResult::Jump(destination.as_usize());
         }
         Opcode::JUMPI => {
             let popped = vm.stack.pop_n(2);
@@ -112,6 +121,8 @@ pub fn evaluate(vm: &mut EVM, opcode: Opcode) -> EvalResult {
             }
             return EvalResult::Continue();
         }
+        // Effectively no-op
+        Opcode::JUMPDEST => EvalResult::Continue(),
         _ => {
             panic!("{:?} is not implemented", opcode);
         }
