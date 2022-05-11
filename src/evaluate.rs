@@ -28,7 +28,7 @@ pub fn evaluate(vm: &mut EVM, opcode: Opcode) -> EvalResult {
         }
         _ if opcode.is_swap() => {
             let stack_pos = opcode.as_u8() - 0x8f;
-            vm.stack.swap(stack_pos);
+            vm.stack.swap(stack_pos.into());
             return EvalResult::Continue();
         }
         _ if opcode.is_dup() => {

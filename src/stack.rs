@@ -27,8 +27,15 @@ impl Stack {
         return split;
     }
 
-    pub fn swap(&mut self, i: u8) {
-        todo!();
+    pub fn swap(&mut self, i: usize) {
+        let length = self._stack.len();
+        let head_index = length - 1;
+        let head = self._stack[head_index];
+        let swap_index = length - (i + 1);
+        let swap_value = self._stack[swap_index];
+
+        self._stack[swap_index] = head;
+        self._stack[head_index] = swap_value;
     }
 
     pub fn peek(&self, n: usize) -> H256 {
