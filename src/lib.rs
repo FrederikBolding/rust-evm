@@ -1,12 +1,12 @@
 mod evaluate;
+mod memory;
 mod opcodes;
 mod stack;
-mod memory;
 
-use evaluate::{evaluate, EvalResult};
+use evaluate::{evaluate, EvalResult, ExitReason};
+use memory::Memory;
 use opcodes::Opcode;
 use stack::Stack;
-use memory::Memory;
 
 pub struct EVM {
     program_counter: usize,
@@ -14,6 +14,7 @@ pub struct EVM {
     data: Vec<u8>,
     stack: Stack,
     memory: Memory,
+    pub return_value: Vec<u8>,
 }
 
 impl EVM {
@@ -24,6 +25,7 @@ impl EVM {
             program_counter,
             stack: Stack::new(),
             memory: Memory::new(),
+            return_value: Vec::new(),
         }
     }
 
@@ -33,10 +35,10 @@ impl EVM {
             match result {
                 EvalResult::Continue() => self.program_counter += 1,
                 EvalResult::Jump(p) => self.program_counter = p,
-                EvalResult::Error() => {
-                    panic!("Execution resulted in an error!")
-                }
-                EvalResult::Exit() => {
+                EvalResult::Exit(reason) => {
+                    if reason == ExitReason::Error {
+                        panic!("Execution resulted in an error!")
+                    }
                     break;
                 }
             }

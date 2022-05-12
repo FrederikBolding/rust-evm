@@ -6,8 +6,15 @@ use primitive_types::{H256, U256};
 pub enum EvalResult {
     Continue(),
     Jump(usize),
-    Exit(),
-    Error(),
+    Exit(ExitReason),
+}
+
+#[derive(Clone, Eq, PartialEq, Debug)]
+pub enum ExitReason {
+    Return,
+    Revert,
+    Stop,
+    Error,
 }
 
 pub fn evaluate(vm: &mut EVM, opcode: Opcode) -> EvalResult {
@@ -36,7 +43,7 @@ pub fn evaluate(vm: &mut EVM, opcode: Opcode) -> EvalResult {
             vm.stack.dup(stack_pos);
             return EvalResult::Continue();
         }
-        Opcode::STOP => EvalResult::Exit(),
+        Opcode::STOP => EvalResult::Exit(ExitReason::Stop),
         Opcode::ADD => {
             let popped = vm.stack.pop_n(2);
             vm.stack
@@ -131,6 +138,15 @@ pub fn evaluate(vm: &mut EVM, opcode: Opcode) -> EvalResult {
         }
         // Effectively no-op
         Opcode::JUMPDEST => EvalResult::Continue(),
+        Opcode::RETURN => {
+            let popped = vm.stack.pop_n(2);
+            let offset = to_u256(popped[0]).as_usize();
+            let length = to_u256(popped[1]).as_usize();
+            if length != 0 {
+                vm.return_value = vm.memory.read(offset, length);
+            }
+            return EvalResult::Exit(ExitReason::Return);
+        }
         _ => {
             panic!("{:?} is not implemented", opcode);
         }

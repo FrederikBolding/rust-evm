@@ -1,4 +1,4 @@
-use primitive_types::{H256};
+use primitive_types::H256;
 
 pub struct Memory {
     pub _memory: Vec<u8>,
@@ -27,5 +27,14 @@ impl Memory {
         }
         let bytes = value.as_bytes();
         self._memory[offset..(offset + size)].clone_from_slice(&bytes[..size])
+    }
+
+    pub fn read(&mut self, offset: usize, size: usize) -> Vec<u8> {
+        let mut slice = Vec::new();
+        slice.resize(size, 0);
+        for i in 0..size {
+            slice[i] = self._memory[offset + i]
+        }
+        return slice;
     }
 }
