@@ -106,6 +106,14 @@ pub fn evaluate(vm: &mut EVM, opcode: Opcode) -> EvalResult {
             vm.stack.push(H256::from_slice(load));
             return EvalResult::Continue();
         }
+        Opcode::MSTORE => {
+            let popped = vm.stack.pop_n(2);
+            let offset = to_u256(popped[0]).as_usize();
+            let value = popped[1];
+            vm.memory.extend(offset, 32);
+            vm.memory.write(offset, 32, value);
+            return EvalResult::Continue();
+        }
         Opcode::JUMP => {
             let destination = to_u256(vm.stack.pop());
             // todo: check valid jump
